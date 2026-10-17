@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tic Tac Toe Multiplayer</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+h1 { color: #38e8c5; }
+input, button {
+  padding: 13px;
+  margin: 6px;
+  border: 0;
+  border-radius: 9px;
+  font-size: 16px;
+}
+button {
+  background: #38e8c5;
+  color: #101827;
+  font-weight: bold;
+  cursor: pointer;
+}
+.panel {
+  max-width: 350px;
+  margin: 20px auto;
+  padding: 15px;
+  background: #1e293b;
+  border-radius: 15px;
+}
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+.cell {
+  width: 90px;
+  height: 90px;
+  font-size: 38px;
+  background: #334155;
+  color: white;
+  border-radius: 12px;
+}
+#game { display: none; }
+</style>
+</head>
+<body>
+
+<h1>⭕ Tic Tac Toe ❌</h1>
+<p>Play with your friend online!</p>
+
+<div class="panel" id="lobby">
+  <h2>Create a Room</h2>
+  <button onclick="createRoom()">Create Room</button>
+
+  <h2>Join a Room</h2>
+  <input id="roomInput" placeholder="Enter Room ID">
+  <br>
+  <button onclick="joinRoom()">Join Room</button>
+  <p id="message">Create a room to start.</p>
+</div>
+
+<div class="panel" id="game">
+  <h2>Room: <span id="roomName"></span></h2>
+  <p id="status">Waiting for player...</p>
+  <div id="board"></div>
+  <button onclick="resetGame()">Restart</button>
+  <button onclick="location.reload()">Exit Room</button>
+</div>
+
+<script>
+let roomId = "";
+let player = "X";
+let board = Array(9).fill("");
+let turn = "X";
+let playing = false;
+
+function createRoom() {
+  roomId = Math.random().toString(36)
+    .substring(2, 8).toUpperCase();
+  player = "X";
+  startGame();
+  document.getElementById("message").textContent =
+    "Room created: " + roomId +
+    ". Share this ID with your friend.";
+}
+
+function joinRoom() {
+  const id = document.getElementById("roomInput")
+    .value.trim().toUpperCase();
+
+  if (!id) {
+    alert("Enter a Room ID!");
+    return;
+  }
+
+  roomId = id;
+  player = "O";
+  startGame();
+  document.getElementById("message").textContent =
+    "Joined room " + roomId;
+}
+
+function startGame() {
+  document.getElementById("lobby").style.display = "block";
+  document.getElementById("game").style.display = "block";
+  document.getElementById("roomName").textContent = roomId;
+  board = Array(9).fill("");
+  turn = "X";
+  playing = true;
+  drawBoard();
+  updateStatus();
+}
+
+function drawBoard() {
+  const el = document.getElementById("board");
+  el.innerHTML = "";
+
+  board.forEach((value, i) => {
+    const b = document.createElement("button");
+    b.className = "cell";
+    b.textContent = value;
+    b.onclick = () => move(i);
+    el.appendChild(b);
+  });
+}
+
+function move(i) {
+  if (!playing || board[i] || turn !== player) return;
+
+  board[i] = player;
+
+  if (winner()) {
+    playing = false;
+    drawBoard();
+    document.getElementById("status").textContent =
+      player + " wins!";
+    return;
+  }
+
+  if (board.every(Boolean)) {
+    playing = false;
+    document.getElementById("status").textContent =
+      "It's a draw!";
+  } else {
+    turn = turn === "X" ? "O" : "X";
+  }
+
+  drawBoard();
+  updateStatus();
+}
+
+function winner() {
+  const lines = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+  return lines.some(line =>
+    line.every(i => board[i] === player)
+  );
+}
+
+function updateStatus() {
+  document.getElementById("status").textContent =
+    "You are " + player + " | Turn: " + turn;
+}
+
+function resetGame() {
+  board = Array(9).fill("");
+  turn = "X";
+  playing = true;
+  drawBoard();
+  updateStatus();
+}
+</script>
+</body>
+    </html>
+    
